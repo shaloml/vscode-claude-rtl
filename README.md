@@ -17,6 +17,20 @@ and **code blocks / editors always stay left-to-right**.
 
 ---
 
+## Other Claude surfaces (browser & desktop)
+
+This extension adds RTL to the **Claude Code chat sidebar in VS Code**. If you use
+Claude elsewhere too, sibling projects cover those surfaces:
+
+- **Claude.ai in the browser (Chrome / Edge)** — the *Claude.ai RTL Transformer*
+  browser extension brings the same Hebrew/Arabic support to claude.ai:
+  - [Chrome Web Store](https://chromewebstore.google.com/detail/claude-ai-rtl-transformer/pcnpnpaipomdildpaehlnmlbiiaagdid)
+  - [Microsoft Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/claude-ai-rtl-transformer/mcbkppnfkonepcpndghjbdlhipmmhipn)
+- **Claude Desktop (Windows)** — RTL for the standalone Claude Desktop app:
+  [shaloml/claude-desktop-windows-rtl](https://github.com/shaloml/claude-desktop-windows-rtl)
+
+---
+
 ## Modes
 
 A compact panel is pinned at the top of the chat (drag it anywhere; it remembers

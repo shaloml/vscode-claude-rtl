@@ -4,6 +4,14 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.2.0] — 2026-06-29
+
+### Added
+- Extension icon (`media/icon128.png`), shown in the Extensions view.
+- README section pointing to the sibling RTL projects for other Claude surfaces:
+  the *Claude.ai RTL Transformer* browser extension (Chrome Web Store / Edge
+  Add-ons) and Claude Desktop for Windows (`shaloml/claude-desktop-windows-rtl`).
+
 ## [0.1.0] — 2026-06-29
 
 Initial release. Distributed as a `.vsix` attached to the GitHub Release (not

@@ -10,6 +10,8 @@ tsconfig.json
 .gitignore
 .vscodeignore
 CHANGELOG.md
+CLAUDE.md
+.a5c/**
 **/.DS_Store
 
 # Explicitly KEEP (do not ignore) — needed at runtime / for the listing:
