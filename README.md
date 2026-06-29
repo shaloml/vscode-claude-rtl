@@ -213,6 +213,18 @@ Tagging `vX.Y.Z` triggers CI
 `.vsix` and creates a GitHub Release with it attached. Keep `CHANGELOG.md` and
 `package.json` `version` in sync with the tag.
 
+## Related projects — Hebrew RTL for Claude everywhere
+
+The same Hebrew/Arabic RTL treatment is available on every Claude surface:
+
+- **Claude Code in VS Code** — *this repo*.
+- **Claude Desktop** (Windows / macOS / Linux) —
+  [`claude-desktop-windows-rtl`](https://github.com/shaloml/claude-desktop-windows-rtl).
+- **Browser (Chrome / Edge)** — *Claude.ai RTL Transformer*, for claude.ai in the browser:
+  - Source: [`shaloml/rtl-chatgpt`](https://github.com/shaloml/rtl-chatgpt)
+  - [Chrome Web Store](https://chromewebstore.google.com/detail/claude-ai-rtl-transformer/pcnpnpaipomdildpaehlnmlbiiaagdid)
+  - [Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/claude-ai-rtl-transformer/mcbkppnfkonepcpndghjbdlhipmmhipn)
+
 ## License
 
 [MIT](LICENSE) © Shalom Levi. Not affiliated with Anthropic or Microsoft.
