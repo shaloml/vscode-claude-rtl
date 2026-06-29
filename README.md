@@ -92,23 +92,20 @@ In plain terms, so you can decide with full information:
 
 ### Option A — the VS Code extension (recommended)
 
-Available on the **[Open VSX Registry](https://open-vsx.org/)** (works in VS Code,
-Cursor, Windsurf, VSCodium, …) and as a downloadable `.vsix`.
+This extension is **not published to any marketplace** — it's distributed as a
+`.vsix` you install yourself. (An extension that edits another publisher's files
+can conflict with Marketplace policy, so it is intentionally release-only.)
 
-- **From Open VSX / a compatible editor:** search for **"Claude Code RTL"** and
-  Install.
-- **From a `.vsix`:** download the latest from
-  [Releases](https://github.com/shaloml/vscode-claude-rtl/releases), then in VS
-  Code: `Extensions: Install from VSIX…` (Command Palette) and pick the file.
-  Or from a terminal: `code --install-extension vscode-claude-rtl-X.Y.Z.vsix`.
+1. Download the latest `vscode-claude-rtl-X.Y.Z.vsix` from
+   [**Releases**](https://github.com/shaloml/vscode-claude-rtl/releases).
+2. Install it — either:
+   - VS Code Command Palette → **Extensions: Install from VSIX…** → pick the file, or
+   - terminal: `code --install-extension vscode-claude-rtl-X.Y.Z.vsix`
+     (Cursor: `cursor --install-extension …`, etc.).
 
 On startup the extension finds Claude Code, applies the patch, and offers a
-one-click **Reload Window**. After a Claude Code update it re-applies automatically
-on the next launch.
-
-> The official Microsoft VS Code Marketplace is intentionally **not** targeted:
-> publishing an extension that edits another publisher's files can conflict with
-> Marketplace policy. Open VSX + VSIX keep the same functionality without that risk.
+one-click **Reload Window**. It also **re-applies automatically after Claude Code
+updates** — see [Staying patched](#staying-patched-after-a-claude-code-update).
 
 ### Option B — standalone scripts (no extension)
 
@@ -149,6 +146,25 @@ skip the watcher. After any (re)patch, reload the webview:
   initial panel mode until you change it in the panel.
 
 ---
+
+## Staying patched (after a Claude Code update)
+
+Because the patch lives **inside** the Claude Code extension, every time Claude
+Code updates it installs a fresh copy and the patch is gone. This happens fairly
+often, so re-applying is expected — but you normally don't have to do it by hand:
+
+- **Extension:** with `claudeCodeRtl.autoApply` on (the default), it detects the
+  new Claude Code version — on the next VS Code start, and immediately when the
+  update lands mid-session — re-applies the patch, and shows a **Reload Window**
+  prompt. Just click it. (If you turned auto-apply off, run the **Claude Code RTL:
+  Enable** command.)
+- **Standalone scripts:** the installed watcher (systemd `--user` timer on Linux /
+  launchd on macOS / Scheduled Task on Windows) re-applies automatically; or just
+  re-run the patcher. If you installed with `--no-auto-update` / `-NoAutoUpdate`,
+  there is no watcher — re-run the patcher yourself after each Claude Code update.
+
+Either way, the change only takes effect once the webview reloads
+(**Developer: Reload Window**).
 
 ## Uninstall / restore
 
@@ -191,11 +207,11 @@ Press **F5** in VS Code to launch an Extension Development Host.
 
 ## Versioning & releases
 
-Semantic versioning. Tagging `vX.Y.Z` triggers CI
+Semantic versioning. Distribution is **GitHub Releases only** (no marketplace).
+Tagging `vX.Y.Z` triggers CI
 ([`.github/workflows/release.yml`](.github/workflows/release.yml)) which builds the
-`.vsix`, creates a GitHub Release with it attached, and publishes to Open VSX
-(requires an `OVSX_TOKEN` repo secret). Keep `CHANGELOG.md` and `package.json`
-`version` in sync with the tag.
+`.vsix` and creates a GitHub Release with it attached. Keep `CHANGELOG.md` and
+`package.json` `version` in sync with the tag.
 
 ## License
 

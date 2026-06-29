@@ -1,9 +1,8 @@
 name: release
 
-# Tag a version (vX.Y.Z) to build the VSIX, attach it to a GitHub Release, and
-# publish to Open VSX. Set the OVSX_TOKEN repository secret for the publish step
-# (https://open-vsx.org/ -> your access token). Without it, the build + release
-# still succeed and only the Open VSX publish is skipped.
+# Tag a version (vX.Y.Z) to build the VSIX and attach it to a GitHub Release.
+# This project is distributed via GitHub Releases only — it is NOT published to
+# any extension marketplace.
 
 on:
   push:
@@ -16,8 +15,6 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
-    env:
-      OVSX_TOKEN: ${{ secrets.OVSX_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
@@ -39,7 +36,3 @@ jobs:
         with:
           files: '*.vsix'
           generate_release_notes: true
-
-      - name: Publish to Open VSX
-        if: ${{ env.OVSX_TOKEN != '' }}
-        run: npx --yes ovsx publish "vscode-claude-rtl-${GITHUB_REF_NAME#v}.vsix" -p "$OVSX_TOKEN"
