@@ -1,0 +1,88 @@
+{
+	"name": "vscode-claude-rtl",
+	"displayName": "Claude Code RTL (Hebrew / Arabic)",
+	"description": "Right-to-left (Hebrew/Arabic) support for the Claude Code chat sidebar, with a floating AUTO / RTL / LTR panel.",
+	"version": "0.1.0",
+	"publisher": "shaloml",
+	"license": "MIT",
+	"author": "Shalom Levi",
+	"homepage": "https://github.com/shaloml/vscode-claude-rtl#readme",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/shaloml/vscode-claude-rtl.git"
+	},
+	"bugs": {
+		"url": "https://github.com/shaloml/vscode-claude-rtl/issues"
+	},
+	"engines": {
+		"vscode": "^1.85.0"
+	},
+	"categories": [
+		"Other"
+	],
+	"keywords": [
+		"rtl",
+		"hebrew",
+		"arabic",
+		"bidi",
+		"claude code"
+	],
+	"galleryBanner": {
+		"color": "#1f1f1f",
+		"theme": "dark"
+	},
+	"activationEvents": [
+		"onStartupFinished"
+	],
+	"main": "./dist/extension.js",
+	"contributes": {
+		"commands": [
+			{
+				"command": "claudeCodeRtl.enable",
+				"title": "Claude Code RTL: Enable / Re-apply"
+			},
+			{
+				"command": "claudeCodeRtl.restore",
+				"title": "Claude Code RTL: Restore original (un-patch)"
+			},
+			{
+				"command": "claudeCodeRtl.status",
+				"title": "Claude Code RTL: Show status"
+			}
+		],
+		"configuration": {
+			"title": "Claude Code RTL",
+			"properties": {
+				"claudeCodeRtl.autoApply": {
+					"type": "boolean",
+					"default": true,
+					"description": "Automatically (re)apply the RTL patch on startup and after Claude Code updates. Turn off to manage it manually with the commands."
+				},
+				"claudeCodeRtl.defaultMode": {
+					"type": "string",
+					"enum": [
+						"auto",
+						"rtl",
+						"ltr"
+					],
+					"default": "auto",
+					"markdownDescription": "Initial direction mode for the floating panel, used until you change it in the panel (the panel remembers your choice afterwards in the webview's `localStorage`)."
+				}
+			}
+		}
+	},
+	"scripts": {
+		"compile": "tsc -p ./",
+		"watch": "tsc -watch -p ./",
+		"vscode:prepublish": "npm run compile",
+		"package": "vsce package",
+		"publish:ovsx": "ovsx publish"
+	},
+	"devDependencies": {
+		"@types/node": "^20.11.0",
+		"@types/vscode": "^1.85.0",
+		"@vscode/vsce": "^2.24.0",
+		"ovsx": "^0.9.0",
+		"typescript": "^5.4.0"
+	}
+}

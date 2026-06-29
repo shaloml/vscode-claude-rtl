@@ -1,0 +1,20 @@
+# Keep the VSIX small: ship only the compiled extension + the payloads it injects.
+.vscode/**
+.github/**
+src/**
+install/**
+node_modules/**
+**/*.ts
+**/*.map
+tsconfig.json
+.gitignore
+.vscodeignore
+CHANGELOG.md
+**/.DS_Store
+
+# Explicitly KEEP (do not ignore) — needed at runtime / for the listing:
+!dist/**
+!payloads/**
+!README.md
+!LICENSE
+!media/**
