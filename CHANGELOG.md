@@ -20,6 +20,9 @@ All notable changes to this project are documented here. The format follows
   attribute's UA styles), silently bringing back the left/right streaming
   oscillation the lock was built to prevent. The locked direction is now also
   asserted at author level via `[data-ccr][dir]` rules.
+- AUTO: list markers (numbers/bullets) of RTL-locked items are no longer
+  clipped — the parent list stays LTR with left-only padding, so right-side
+  markers were drawn outside it; they now render inside the item's content.
 
 ### Added
 - Strip literal bidi-escape text (the six ASCII characters `\u200F`, `\u200E`,

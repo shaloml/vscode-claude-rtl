@@ -69,20 +69,27 @@ html[data-claude-rtl-mode="ltr"] body {
  * block's OWN first strong character, ignoring the root-driven forced
  * direction — so under force-RTL a paragraph starting with an English word
  * still rendered LTR. Re-assert the forced direction on those blocks and
- * cancel plaintext with `isolate`. Code stays LTR via the direct rule above. */
+ * cancel plaintext with `isolate`. Code stays LTR via the direct rule above.
+ *
+ * !important is required, not paranoia: the app ships the plaintext rule three
+ * times — :is(), :-webkit-any() and :-moz-any(). The legacy :-webkit-any alias
+ * (honored by Chromium/Electron) counts as a full pseudo-class, giving that
+ * copy specificity (0,2,0), which beats any sane selector we could write.
+ * Importance ends the arms race; it cannot leak into pre/code because those
+ * elements get direction from their own direct rule, not by inheritance. */
 html[data-claude-rtl-mode="rtl"] :is(p, li, h1, h2, h3, h4, h5, h6, blockquote, td, th, dd, dt, summary, figcaption) {
-	direction: rtl;
-	unicode-bidi: isolate;
+	direction: rtl !important;
+	unicode-bidi: isolate !important;
 }
 html[data-claude-rtl-mode="ltr"] :is(p, li, h1, h2, h3, h4, h5, h6, blockquote, td, th, dd, dt, summary, figcaption) {
-	direction: ltr;
-	unicode-bidi: isolate;
+	direction: ltr !important;
+	unicode-bidi: isolate !important;
 }
-html[data-claude-rtl-mode="rtl"] [dir="auto"] {
-	direction: rtl;
+html[data-claude-rtl-mode="rtl"] [dir="auto"]:not(pre *):not(code *):not(.monaco-editor *) {
+	direction: rtl !important;
 }
-html[data-claude-rtl-mode="ltr"] [dir="auto"] {
-	direction: ltr;
+html[data-claude-rtl-mode="ltr"] [dir="auto"]:not(pre *):not(code *):not(.monaco-editor *) {
+	direction: ltr !important;
 }
 
 /* AUTO mode: the dir attribute we lock per block only carries UA-level styles,
@@ -91,12 +98,20 @@ html[data-claude-rtl-mode="ltr"] [dir="auto"] {
  * direction at author level, with `isolate` to cancel plaintext. data-ccr is
  * ours, so this can never touch an app-authored dir attribute. */
 [data-ccr][dir="rtl"] {
-	direction: rtl;
-	unicode-bidi: isolate;
+	direction: rtl !important;
+	unicode-bidi: isolate !important;
 }
 [data-ccr][dir="ltr"] {
-	direction: ltr;
-	unicode-bidi: isolate;
+	direction: ltr !important;
+	unicode-bidi: isolate !important;
+}
+
+/* AUTO: an RTL-locked list item draws its marker on the RIGHT, but its parent
+ * ol/ul is still LTR with left-only padding, so the marker lands in a zero-
+ * padding zone and gets clipped (numbers/bullets vanish on Hebrew items).
+ * Render the marker inside the item's content flow instead. */
+li[data-ccr][dir="rtl"] {
+	list-style-position: inside;
 }
 
 /* Force-RTL has no per-turn gutter marker (AUTO only tags RTL turns), so mirror
