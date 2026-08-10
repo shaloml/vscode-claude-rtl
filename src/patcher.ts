@@ -75,7 +75,12 @@ function restoreFromBakOrStrip(file: string): void {
  * *.bak on first run and restores from them before every re-inject, so calling
  * this repeatedly always patches a clean original.
  */
-export function apply(target: Target, payloadsDir: string, defaultMode: string): void {
+export function apply(
+	target: Target,
+	payloadsDir: string,
+	defaultMode: string,
+	stripEscapedBidi = true
+): void {
 	const { cssPath: css, jsPath: js } = target;
 
 	// Safety: an injection present but no .bak means we'd bake the patch into the
@@ -104,6 +109,11 @@ export function apply(target: Target, payloadsDir: string, defaultMode: string):
 	let pre = '';
 	if (defaultMode === 'rtl' || defaultMode === 'ltr') {
 		pre = `try{window.__claudeCodeRtlDefaultMode=${JSON.stringify(defaultMode)};}catch(e){}\n`;
+	}
+	// Escape stripping is on by default in the payload; only an explicit opt-out
+	// (claudeCodeRtl.stripEscapedBidi = false) needs to be passed in.
+	if (!stripEscapedBidi) {
+		pre += `try{window.__claudeCodeRtlStripEscapes=false;}catch(e){}\n`;
 	}
 	// Lead with a bare ';' so we never glue onto a trailing call expression in the
 	// minified bundle; the payload runs under the page's existing CSP nonce.

@@ -15,6 +15,7 @@ const STATE_LAST_EXT = 'claudeCodeRtl.lastPatchedExtPath';
 interface Cfg {
 	autoApply: boolean;
 	defaultMode: string;
+	stripEscapedBidi: boolean;
 }
 
 function getConfig(): Cfg {
@@ -22,6 +23,7 @@ function getConfig(): Cfg {
 	return {
 		autoApply: c.get<boolean>('autoApply', true),
 		defaultMode: c.get<string>('defaultMode', 'auto'),
+		stripEscapedBidi: c.get<boolean>('stripEscapedBidi', true),
 	};
 }
 
@@ -76,7 +78,8 @@ async function runApply(
 	}
 
 	try {
-		apply(target, payloadsDir, getConfig().defaultMode);
+		const cfg = getConfig();
+		apply(target, payloadsDir, cfg.defaultMode, cfg.stripEscapedBidi);
 		await context.globalState.update(STATE_LAST_EXT, target.extPath);
 	} catch (e) {
 		vscode.window.showErrorMessage(`Claude Code RTL: ${errMsg(e)}`);

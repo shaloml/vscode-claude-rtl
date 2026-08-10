@@ -49,6 +49,38 @@
 	// Our own control panel is skipped too so AUTO never stamps it.
 	var SKIP_SEL = 'pre,code,textarea,input,[class*="codeBlock"],[class*="CodeBlock"],.monaco-editor,#claude-rtl-panel';
 
+	// The model sometimes emits a bidi mark as LITERAL escape text — the six
+	// ASCII characters backslash-u-2-0-0-F (or 200E / 200B) — which renders as
+	// garbage and, starting with Latin "u", drags a Hebrew block's first-strong
+	// detection to LTR. Strip that literal text (never real invisible marks —
+	// those are invisible and sometimes intentional) from rendered prose only.
+	// Display-only: the underlying transcript is untouched. Disabled when the
+	// extension's claudeCodeRtl.stripEscapedBidi setting is off (the patcher
+	// then sets window.__claudeCodeRtlStripEscapes = false).
+	var RE_ESC = /\\u200[BbEeFf]/g;
+	// On top of SKIP_SEL, never rewrite the composer / any editable surface —
+	// the user may be typing an escape sequence deliberately.
+	var STRIP_SKIP_SEL = SKIP_SEL + ',[class*="messageInput"],[contenteditable="true"]';
+
+	function stripEscapes(root) {
+		if (window.__claudeCodeRtlStripEscapes === false) return;
+		try {
+			if (root.closest && root.closest(STRIP_SKIP_SEL)) return;
+			var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+			var node;
+			while ((node = walker.nextNode())) {
+				var t = node.data;
+				if (t.indexOf('\\u200') === -1) continue; // cheap prefilter
+				var host = node.parentElement;
+				if (host && host.closest && host.closest(STRIP_SKIP_SEL)) continue;
+				var s = t.replace(RE_ESC, '');
+				// Write only on an actual change: our own write re-fires the
+				// observer, and an unconditional write would loop forever.
+				if (s !== t) node.data = s;
+			}
+		} catch (e) { /* cosmetic only — never block the UI */ }
+	}
+
 	// Strong RTL scripts (Hebrew, Arabic, Syriac, Thaana, NKo, Arabic presentation
 	// forms). Basic-Latin letters stand in for "strong LTR" — enough for English
 	// and code without dragging in every Unicode letter.
@@ -119,9 +151,11 @@
 		el.__gutterLocked = true;
 	}
 
-	// Decide `root` and every block/container descendant it contains.
+	// Decide `root` and every block/container descendant it contains. Escape
+	// stripping runs FIRST so first-strong detection sees the cleaned text.
 	function decideWithin(root) {
 		if (!root || root.nodeType !== 1) return;
+		stripEscapes(root);
 		if (root.matches) {
 			if (root.matches(GUTTER_SEL)) markGutter(root);
 			if (root.matches(USERMSG_SEL) || root.matches(BLOCK_SEL)) decide(root);
