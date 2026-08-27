@@ -2,7 +2,7 @@
 	"name": "vscode-claude-rtl",
 	"displayName": "Claude Code RTL (Hebrew / Arabic)",
 	"description": "Right-to-left (Hebrew/Arabic) support for the Claude Code chat sidebar, with a floating AUTO / RTL / LTR panel.",
-	"version": "0.2.2",
+	"version": "0.2.3",
 	"publisher": "shaloml",
 	"license": "MIT",
 	"author": "Shalom Levi",
