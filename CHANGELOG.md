@@ -4,6 +4,24 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.2.2] — 2026-08-27
+
+### Fixed
+- **A paragraph that opens with a curly quote, an em dash, a bullet, a
+  check-mark or a CJK character is no longer right-aligned.** The strong-RTL
+  character class in `payloads/rtl-inject.js` was written with literal
+  characters and had been NFC-normalised somewhere between repositories:
+  U+FB1D (HEBREW LETTER YOD WITH HIRIQ) decomposes into U+05D9 U+05B4, so the
+  intended `\uFB1D-\uFDFD` range began at U+05B4 and covered most of the Basic
+  Multilingual Plane — General Punctuation, arrows, dingbats, box drawing,
+  Thai, every Brahmic script, CJK, Hangul and the private-use area. Dumped as
+  code points the class read `U+0591-U+07FF U+200F U+05D9 U+05B4-U+FDFD
+  U+FE70-U+FEFC`. Because AUTO locks an element on the first strong character
+  it finds, any assistant paragraph starting `“…`, `— …`, `• …` or `✅ …` was
+  pinned RTL for the life of that element, in the default mode. The class is
+  now spelled in `\u` escapes so no normaliser can reach it again. Found by a
+  code review of the Solevi Cockpit, which vendors this payload byte-identical.
+
 ## [0.2.1] — 2026-08-10
 
 ### Fixed
