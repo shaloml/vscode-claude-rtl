@@ -4,6 +4,35 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.2.3] - 2026-08-28
+
+### Fixed
+- **A paragraph in Cyrillic, Greek or an accented-first Latin word no longer
+  flips right-aligned mid-stream.** Strong LTR was `[A-Za-z\u200E]` - Basic Latin
+  only - so a paragraph opening in any other script matched neither direction
+  class, stayed undecided, and the first Hebrew glyph to stream in later locked
+  it RTL for the life of the element. Measured on a fixture: `dir` went from
+  `null` to `rtl` on a Cyrillic paragraph the moment one Hebrew word arrived.
+  Strong LTR is now `\p{L}` - what the bidi algorithm calls class L - and the
+  strong-RTL range was widened from U+07FF to U+08FF so Samaritan, Mandaic,
+  Syriac Supplement and Arabic Extended-A/B keep reading as RTL rather than
+  falling into "any letter". The two classes now overlap on RTL letters, so
+  `firstStrongDir()` breaks a tie at the same index in favour of RTL. A CJK
+  paragraph now decides LTR instead of staying undecided, which is what class L
+  says and which also closes the same flip.
+
+### Performance
+- **A streaming reply no longer costs one tree pass per token.** The mutation
+  observer collected every `characterData` mutation into a list without
+  de-duplicating it: 200 mutations on one text node cost 401 `querySelectorAll`
+  calls in a single frame (measured; 1,000 would cost 2,001). The pending set is
+  keyed by element now, and `stampInput()`'s document-wide query runs only on a
+  frame that actually inserted an element. Same fixture, same 200 mutations: 2
+  calls.
+
+Both found by the 2026-08-27 re-review of the Solevi Cockpit (LOW-U2, LOW-P7),
+which vendors this payload byte-identical.
+
 ## [0.2.2] — 2026-08-27
 
 ### Fixed

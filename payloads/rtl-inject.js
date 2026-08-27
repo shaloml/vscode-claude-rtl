@@ -81,9 +81,10 @@
 		} catch (e) { /* cosmetic only — never block the UI */ }
 	}
 
-	// Strong RTL scripts (Hebrew, Arabic, Syriac, Thaana, NKo, Arabic presentation
-	// forms). Basic-Latin letters stand in for "strong LTR" — enough for English
-	// and code without dragging in every Unicode letter.
+	// Strong RTL scripts: Hebrew, Arabic, Syriac, Thaana, NKo, Samaritan, Mandaic,
+	// Arabic Extended-A/B and the Arabic presentation forms. Everything between
+	// U+0591 and U+08FF is right-to-left script territory, so the range is the
+	// whole of it rather than a list that has to be extended per script.
 	//
 	// Written in \u escapes, and it has to stay that way. Spelled with literal
 	// characters, this class was NFC-normalised somewhere on its way between
@@ -92,10 +93,21 @@
 	// swallowed most of the Basic Multilingual Plane - General Punctuation,
 	// dingbats, arrows, CJK, Hangul. Every paragraph opening with a curly
 	// quote, an em dash, a bullet or a check-mark was locked RTL for good.
-	var RE_RTL = /[\u0591-\u07FF\u200F\uFB1D-\uFDFD\uFE70-\uFEFC]/;
-	// Escaped for the same reason, and because a literal U+200E in a source
-	// file is invisible to every reader of it.
-	var RE_LTR = /[A-Za-z\u200E]/;
+	var RE_RTL = /[\u0591-\u08FF\u200F\uFB1D-\uFDFD\uFE70-\uFEFC]/;
+	// Strong LTR is "any letter that is not one of those scripts", which is what
+	// the Unicode bidi algorithm means by class L - not "a Basic-Latin letter",
+	// which is what this used to say. Cyrillic, Greek and an accented first
+	// letter were strong in neither class, so the paragraph stayed undecided and
+	// the first Hebrew glyph to stream in later locked it right-aligned
+	// (LOW-U2 of the 2026-08-27 re-review, measured: dir went null -> rtl).
+	//
+	// \p{L} deliberately overlaps RE_RTL - a Hebrew letter is a letter too - so
+	// firstStrongDir() breaks a tie at the same index in favour of RTL. Keeping
+	// the two classes disjoint would mean subtracting one from the other, which
+	// a plain character class cannot do without the v flag.
+	// U+200E is escaped because a literal LRM in a source file is invisible to
+	// every reader of it.
+	var RE_LTR = /[\p{L}\u200E]/u;
 
 	// ---- Mode + persistence --------------------------------------------------
 	// 'auto' | 'rtl' | 'ltr'. AUTO = per-block detection; rtl/ltr = forced.
@@ -130,7 +142,9 @@
 		if (r === -1 && l === -1) return null;
 		if (r === -1) return 'ltr';
 		if (l === -1) return 'rtl';
-		return r < l ? 'rtl' : 'ltr';
+		// Same index means one character matched both classes, which only an
+		// RTL letter can do: RE_LTR is every letter, RE_RTL is the RTL scripts.
+		return r <= l ? 'rtl' : 'ltr';
 	}
 
 	// Decide + lock a single block element. Once locked we never revisit it, which
@@ -340,21 +354,32 @@
 		// characterData changes so a block that streamed in neutral-first (e.g. a
 		// bullet or number) gets decided the moment its first strong glyph arrives.
 		var scheduled = false;
-		var pending = [];
+		// One entry per element per frame. A streaming reply fires a characterData
+		// mutation per token on the same text node, and an array kept every one of
+		// them: 1,000 mutations cost 1,000 stripEscapes tree walks and 2,001
+		// querySelectorAll calls in a single frame (LOW-P7 of the 2026-08-27
+		// re-review; measured here at 401 calls for 200 mutations).
+		var pending = new Set();
+		// stampInput() is a document-wide query, and the composer can only appear
+		// or lose its dir through an inserted element - so a frame that saw none
+		// has nothing for it to find.
+		var inserted = false;
 		function flush() {
 			scheduled = false;
 			var batch = pending;
-			pending = [];
+			pending = new Set();
+			var hadInsert = inserted;
+			inserted = false;
 			try {
-				for (var n = 0; n < batch.length; n++) {
-					decideWithin(batch[n]);
+				batch.forEach(function (el) {
+					decideWithin(el);
 					// A turn often streams in neutral-first (a spinner or tool row
 					// before any Hebrew). Re-check its enclosing turn so the gutter
 					// locks the moment the first strong glyph arrives.
-					var turn = batch[n].closest && batch[n].closest(GUTTER_SEL);
+					var turn = el.closest && el.closest(GUTTER_SEL);
 					if (turn) markGutter(turn);
-				}
-				stampInput();
+				});
+				if (hadInsert) stampInput();
 				// Re-create the panel if the app re-rendered <body> out from under it.
 				if (!document.getElementById(PANEL_ID)) buildPanel();
 			} catch (e) { /* ignore */ }
@@ -367,15 +392,15 @@
 				var m = mutations[i];
 				if (m.type === 'characterData') {
 					var host = m.target.parentElement;
-					if (host) pending.push(host);
+					if (host) pending.add(host);
 					continue;
 				}
 				var added = m.addedNodes;
 				for (var k = 0; k < added.length; k++) {
-					if (added[k].nodeType === 1) pending.push(added[k]);
+					if (added[k].nodeType === 1) { pending.add(added[k]); inserted = true; }
 				}
 			}
-			if (!pending.length) return;
+			if (!pending.size) return;
 			if (!scheduled) { scheduled = true; schedule(); }
 		});
 		observer.observe(document.body, { childList: true, subtree: true, characterData: true });
