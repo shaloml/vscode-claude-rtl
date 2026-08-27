@@ -84,8 +84,18 @@
 	// Strong RTL scripts (Hebrew, Arabic, Syriac, Thaana, NKo, Arabic presentation
 	// forms). Basic-Latin letters stand in for "strong LTR" — enough for English
 	// and code without dragging in every Unicode letter.
-	var RE_RTL = /[֑-߿‏יִ-﷽ﹰ-ﻼ]/;
-	var RE_LTR = /[A-Za-z‎]/;
+	//
+	// Written in \u escapes, and it has to stay that way. Spelled with literal
+	// characters, this class was NFC-normalised somewhere on its way between
+	// repositories: U+FB1D (HEBREW LETTER YOD WITH HIRIQ) decomposed into
+	// U+05D9 U+05B4, so the intended \uFB1D-\uFDFD range began at U+05B4 and
+	// swallowed most of the Basic Multilingual Plane - General Punctuation,
+	// dingbats, arrows, CJK, Hangul. Every paragraph opening with a curly
+	// quote, an em dash, a bullet or a check-mark was locked RTL for good.
+	var RE_RTL = /[\u0591-\u07FF\u200F\uFB1D-\uFDFD\uFE70-\uFEFC]/;
+	// Escaped for the same reason, and because a literal U+200E in a source
+	// file is invisible to every reader of it.
+	var RE_LTR = /[A-Za-z\u200E]/;
 
 	// ---- Mode + persistence --------------------------------------------------
 	// 'auto' | 'rtl' | 'ltr'. AUTO = per-block detection; rtl/ltr = forced.
